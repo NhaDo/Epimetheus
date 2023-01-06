@@ -3,6 +3,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import React, { useState, useEffect, useRef} from 'react';
 import Button from './Button.js';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function App() {
   const [hasCameraermission, setHasCameraPermission] = useState(null);
@@ -43,6 +44,23 @@ export default function App() {
       }
     }
   }
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    console.log(result);
+    
+    if (!result.canceled) {
+      //save to library - change here to load to pandora
+      await MediaLibrary.createAssetAsync(result.assets[0].uri);
+      alert('Picture saved to library!');
+      setImage(result.assets[0].uri);
+    }
+  };
 
   if(hasCameraermission === false){
     return <Text>No access to camera.</Text>
@@ -61,6 +79,7 @@ export default function App() {
         flashMode={flash}
         ref={cameraRef}
       >
+        {/* upper buttons */}
         <View style={styles.button}>
           <Button 
           icon={'flash'}
@@ -80,19 +99,25 @@ export default function App() {
       : 
       <Image source={{uri: image}} style={styles.camera}></Image>
       }
+      {/* lower buttons */}
       <View>
         {image ?
           <View  style={styles.button}>
-          <Button icon='qq' title={'Use Pandora'} onPress={usePandora}/>
-          <Button icon='ccw' title={'Retake'} onPress={
-            () => setImage(null)
-          }/>
+            <Button icon='qq' title={'Use Pandora'} onPress={usePandora}/>
+            <Button icon='ccw' title={'Retake'} onPress={
+              () => setImage(null)
+            }/>
           </View>
         :
-          <Button
-            icon='camera'
-            onPress={takePicture}
-          />
+          <View  style={styles.button}>
+            <Button
+              icon='camera'
+              onPress={takePicture}
+            />
+            <Button
+              icon='image'
+              onPress={pickImage}/>
+          </View>
         }
       </View>
     </View>
