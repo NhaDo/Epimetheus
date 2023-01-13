@@ -48,7 +48,6 @@ export default ListScreen = ({navigation,route}) => {
   useEffect(() => {
     callAPI();
     console.log('isLoading', isLoading);
-    console.log('loaded data', data[0].list_b64_str);
   }, []);
 
   return (    
