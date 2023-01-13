@@ -1,144 +1,20 @@
-import { Camera, CameraType } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import React, { useState, useEffect, useRef} from 'react';
-import Button from './Button.js';
-import * as ImagePicker from 'expo-image-picker';
+import OutputScreen from './Services.js';
+import Home from './Home.js';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import ListScreen from './List.js';
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [hasCameraermission, setHasCameraPermission] = useState(null);
-  const [image, setImage] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
-  const [flash, setFlash] = useState(Camera.Constants.FlashMode.Off)
-  const cameraRef = useRef(null);
-
-  useEffect(()=>{
-    (async() => {
-      MediaLibrary.requestPermissionsAsync();
-      const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status == 'granted');
-
-    })();
-  },[])
-
-  const takePicture = async()=>{
-    if(cameraRef) {
-      try{
-        const data = await cameraRef.current.takePictureAsync();
-        console.log(data);
-        setImage(data.uri);
-      } catch(e) {
-        console.log(e);
-      }
-    }
-  }
-  const usePandora = async() =>{
-    if(image) {
-      try{ // change this to use API
-        console.log(image);
-        await MediaLibrary.createAssetAsync(image);
-        alert('Picture saved to library!'); 
-        setImage(null);
-      } catch(e_){
-        console.log(e_)
-      }
-    }
-  }
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    console.log(result);
-    
-    if (!result.canceled) {
-      //save to library - change here to load to pandora
-      await MediaLibrary.createAssetAsync(result.assets[0].uri);
-      alert('Picture saved to library!');
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  if(hasCameraermission === false){
-    return <Text>No access to camera.</Text>
-  }
-
-  function toggleCameraType() {
-    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-  }
-
-  return (
-    <View style={styles.container}>
-      {!image ?
-      <Camera 
-        style={styles.camera} 
-        type={type}
-        flashMode={flash}
-        ref={cameraRef}
-      >
-        {/* upper buttons */}
-        <View style={styles.button}>
-          <Button 
-          icon={'flash'}
-          color={flash===Camera.Constants.FlashMode.off ? 'gray' : '#f1f1f1'}
-          onPress={()=>{
-            setFlash(flash===Camera.Constants.FlashMode.off
-              ? Camera.Constants.FlashMode.on
-              : Camera.Constants.FlashMode.off )
-          }}/>
-          <Button 
-          icon={'retweet'} 
-          onPress={()=>{
-              setType(type===CameraType.back ? CameraType.front : CameraType.back)
-          }}/>
-        </View>
-      </Camera>
-      : 
-      <Image source={{uri: image}} style={styles.camera}></Image>
-      }
-      {/* lower buttons */}
-      <View>
-        {image ?
-          <View  style={styles.button}>
-            <Button icon='qq' title={'Use Pandora'} onPress={usePandora}/>
-            <Button icon='ccw' title={'Retake'} onPress={
-              () => setImage(null)
-            }/>
-          </View>
-        :
-          <View  style={styles.button}>
-            <Button
-              icon='camera'
-              onPress={takePicture}
-            />
-            <Button
-              icon='image'
-              onPress={pickImage}/>
-          </View>
-        }
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    paddingBottom: 10,
-    paddingTop: 20
-  },
-  camera:{
-    flex:1,
-  },
-  button: {
-    flexDirection:'row', 
-    justifyContent:'space-between',
-    paddingHorizontal: 50,
-    backgroundColor: '#000',
-  }
-});
+	return (
+		<NavigationContainer>
+			<Stack.Navigator>
+				<Stack.Screen name="Home" component={Home} options={{title:"Take a pic"}}/>
+				<Stack.Screen name="OutputScreen" component={OutputScreen}/>
+				<Stack.Screen name="ListScreen" component={ListScreen}/>
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+};
